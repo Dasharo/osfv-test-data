@@ -25,6 +25,15 @@ We do not use
 [remote in git-annex](https://git-annex.branchable.com/special_remotes/) right now, we
 rely on URLs prepare beforehand. It may change in the future.
 
+## Setup this repo
+
+* After cloning, execute following to finalize test data setup:
+
+```bash
+git annex pull
+./setup.sh
+```
+
 ## Common actions
 
 * Add new file from URL:
