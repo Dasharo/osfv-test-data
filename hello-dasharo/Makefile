@@ -34,6 +34,7 @@ dist: sign
 	cp hello-dasharo-signed-good.efi ./$@/
 	cp hello-dasharo-signed-bad.efi ./$@/
 	cp ./signing/cert_good.der ./$@/
+	cp hello-dasharo.efi ./$@/cert_fake.der
 
 clean:
 	rm -rf *.o
