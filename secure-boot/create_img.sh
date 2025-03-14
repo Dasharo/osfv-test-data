@@ -8,13 +8,13 @@ error_check() {
     fi
 }
 
-IMAGELABEL="SB_TEST"
-FILES_DIR="files"
-IMAGE_FILE="sb_test_data.img"
+IMAGELABEL="BAD_INFLUE"
+FILES_DIR="../hello-dasharo/dist"
+IMAGE_FILE="sb_test_BAD_INFLUE.img"
 
 # Step 1: Create blank image
 echo "Creating blank image..."
-dd if=/dev/zero of=$IMAGE_FILE bs=1M count=8 > /dev/null 2>&1
+dd if=/dev/zero of=$IMAGE_FILE bs=1M count=4 > /dev/null 2>&1
 error_check "Cannot create empty image file to store created certs and EFI files"
 
 mkfs.fat -F 12 $IMAGE_FILE -n $IMAGELABEL > /dev/null 2>&1

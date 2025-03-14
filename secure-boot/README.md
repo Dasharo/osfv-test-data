@@ -1,6 +1,7 @@
 # Secure Boot
 
-## sb_test_data.img
+## sb_test_BAD_INFLUE.img
 
-* Content: files from `files` directory
+* Content: files from `../hello_dasharo/dist` directory
 * Building: run `create_img.sh`
+
