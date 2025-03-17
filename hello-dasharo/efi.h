@@ -52,12 +52,12 @@ typedef EFI_STATUS (EFIAPI *EFI_TEXT_STRING) (
     IN CHAR16                          *String
 );
 
-// ---
-
 typedef struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL {
     EFI_TEXT_RESET               Reset;
     EFI_TEXT_STRING              OutputString;
 } EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
+
+// ---
 
 typedef struct EFI_SIMPLE_TEXT_INPUT_PROTOCOL EFI_SIMPLE_TEXT_INPUT_PROTOCOL;
 
@@ -81,6 +81,8 @@ typedef EFI_STATUS (EFIAPI *EFI_INPUT_READ_KEY) (
 typedef EFI_STATUS (EFIAPI *EFI_FREE_POOL) (
     IN VOID *Buffer
 );
+
+// ---
 
 typedef VOID (EFIAPI *EFI_EVENT_NOTIFY) (
     IN EFI_EVENT Event,
@@ -129,6 +131,20 @@ typedef EFI_STATUS (EFIAPI *EFI_WAIT_FOR_EVENT) (
     OUT UINTN    *Index
 );
 
+// ---
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_EXIT_BOOT_SERVICES) (
+    IN EFI_HANDLE ImageHandle,
+    IN UINTN      MapKey
+);
+
+typedef EFI_STATUS
+(EFIAPI * 	EFI_STALL) (
+    IN UINTN Microseconds
+);
+
 /*** END OF PROTOCOLS ***/
 
 typedef struct {
@@ -162,6 +178,24 @@ typedef struct {
     EFI_CLOSE_EVENT    CloseEvent;
     void*              CheckEvent;
 
+    void* InstallProtocolInterface;
+    void* ReinstallProtocolInterface;
+    void* UninstallProtocolInterface;
+    void* HandleProtocol;
+    VOID* Reserved;
+    void* RegisterProtocolNotify;
+    void* LocateHandle;
+    void* LocateDevicePath;
+    void* InstallConfigurationTable;
+
+    void*                  LoadImage;
+    void*                  StartImage;
+    void*                  Exit;
+    void*                  UnloadImage;
+    EFI_EXIT_BOOT_SERVICES ExitBootServices;
+
+    void*                  GetNextMonotonicCount;
+    EFI_STALL              Stall;
 } EFI_BOOT_SERVICES;
 
 typedef struct {
