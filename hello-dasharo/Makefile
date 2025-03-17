@@ -22,7 +22,7 @@ hello-dasharo.efi: hello-dasharo.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 sign: hello-dasharo.efi
-	cd signing; ./regene.sh
+	cd signing; ./keygen.sh
 	sbsign --key signing/private-key-good.pem --cert signing/cert_good.pem \
 	--output hello-dasharo-signed-good.efi $<
 	sbsign --key signing/private-key-bad.pem --cert signing/cert_bad.pem \
