@@ -10,7 +10,7 @@ error_check() {
 
 IMAGELABEL="BAD_INFLUE"
 FILES_DIR="../hello-dasharo/dist"
-IMAGE_FILE="sb_test_BAD_INFLUE.img"
+IMAGE_FILE="sb_test_data.img"
 
 # Step 1: Create blank image
 echo "Creating blank image..."
