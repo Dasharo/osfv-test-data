@@ -17,14 +17,15 @@ echo "Creating blank image..."
 dd if=/dev/zero of=$IMAGE_FILE bs=1M count=4 > /dev/null 2>&1
 error_check "Cannot create empty image file to store created certs and EFI files"
 
-mkfs.fat -F 12 $IMAGE_FILE -n $IMAGELABEL > /dev/null 2>&1
+printf '%b\n\n\n\n' n 'w\n\c' | fdisk $IMAGE_FILE
+LOOPDEV=$(sudo losetup --show -Pf $IMAGE_FILE)
+
+echo $LOOPDEV
+
+sudo mkfs.ext2 $LOOPDEV -L $IMAGELABEL > /dev/null 2>&1
 error_check "Cannot assign label: $IMAGELABEL"
 
 # Step 2: Mount it in tmp dir via losetup
-echo "Setting up loop device and mounting..."
-LOOPDEV=$(sudo losetup --find --show $IMAGE_FILE)
-error_check "Cannot set up loop device"
-
 MOUNTDIR=$(mktemp -d)
 error_check "Cannot create temporary mount directory"
 
