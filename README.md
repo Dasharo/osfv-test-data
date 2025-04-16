@@ -42,3 +42,12 @@ git annex pull
 git annex addurl https://github.com/Dasharo/meta-dts/releases/download/v2.1.3/dts-base-image-v2.1.3.wic.gz --file=dts/dts-base-image-v2.1.3.wic.gz
 git annex addurl http://www.tinycorelinux.net/15.x/x86/release/TinyCore-15.0.iso --file iso/TinyCore-15.0.iso
 ```
+* Delete file permanently - use with caution:
+
+```bash
+git annex drop --force FILE_NAME
+git annex whereis FILE_NAME                 # list of all copies known by annex
+git annex drop --force FILE_NAME --from web # execute this line for each repository listed, web is one to use with http(s) links
+rm FILE_NAME
+git annex sync
+```
