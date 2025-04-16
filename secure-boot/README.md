@@ -1,7 +1,9 @@
 # Secure Boot
 
-## sb_test_BAD_INFLUE.img
+## sb_test_data.img
 
-* Content: files from `../hello-dasharo/dist` directory
-* Building: run `create_img.sh`
+* Single FAT32 partition, labeled BAD_INFLUE, on MBR disk image
+* Contains files from `../hello-dasharo/dist` directory
+* Run `create_img.sh` to re-create
+* Can be safely transferred with dd command to USB stick
 
