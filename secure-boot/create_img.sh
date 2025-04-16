@@ -50,12 +50,10 @@ echo "Copying files to image..."
 if [ -d "$FILES_DIR" ]; then
     sudo cp -v -r $FILES_DIR/* $MOUNTDIR
     error_check "Cannot copy files to image"
-     sudo sync
+    sudo sync
 else
     echo "Warning: $FILES_DIR does not exist or is not a directory"
 fi
-
-sudo sync
 
 echo
 echo  $MOUNTDIR contains:
