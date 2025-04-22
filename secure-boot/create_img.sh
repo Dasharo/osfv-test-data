@@ -12,14 +12,14 @@ IMAGELABEL="BAD_INFLUE"
 FILES_DIR="../hello-dasharo/dist"
 IMAGE_FILE="sb_test_data.img"
 # 34 megabytes is minimal image size to avoid mkfs.fat complaints on FAT32 creation
-IMAGE_SIZE_MEGABYTES=34
+IMAGE_SIZE_MEGABYTES=100
 SECTOR_SIZE_BYTES=512
 PARTTION_OFFSET_SECTORS=2048
 
 # do the math
 IMAGE_SIZE_SECTORS=$((($IMAGE_SIZE_MEGABYTES*1024*1024)/$SECTOR_SIZE_BYTES))
-OFFSET_BYTES=$(($PARTTION_OFFSET_SECTORS * $SECTOR_SIZE_BYTES))
-echo Partition offset bytes: $OFFSET_BYTES
+PARTITION_OFFSET_BYTES=$(($PARTTION_OFFSET_SECTORS * $SECTOR_SIZE_BYTES))
+echo Partition offset bytes: $PARTITION_OFFSET_BYTES
 
 # Step 1: Create blank image
 echo "Creating blank image..."
@@ -31,7 +31,7 @@ error_check "Cannot create empty image file to store created certs and EFI files
 parted -s $IMAGE_FILE mklabel msdos mkpart primary fat32 $((PARTTION_OFFSET_SECTORS))s $(($IMAGE_SIZE_SECTORS-1))s
 
 # Step 3: Attach loop device to created partition
-LOOPDEV=$(sudo losetup --offset $OFFSET_BYTES --show --find $IMAGE_FILE)
+LOOPDEV=$(sudo losetup --offset $PARTITION_OFFSET_BYTES --show --find $IMAGE_FILE)
 echo $LOOPDEV
 MOUNTDIR=$(mktemp -d)
 
