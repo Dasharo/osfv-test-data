@@ -14,5 +14,5 @@
 
 ### How to transfer image to USB stick:
 1. Use `lsblk` command to identify target USB stick device node and any active mount points.
-2. Use `sudo dd of=./sb_test_data.img if=/dev/X bs=1M status=progress` where X is identified target device node.
+2. Use `sudo dd if=./sb_test_data.img of=/dev/X bs=1M status=progress` where X is identified target device node.
 3. Use `sync` command to finalize write operations before stick removal.
