@@ -1,2 +1,6 @@
 dts/dts-base-image-v*.wic
 uefi-shell/edk2
+hello-dasharo/dist
+hello-dasharo/*.efi
+hello-dasharo/signing/*.pem
+hello-dasharo/signing/*.der
