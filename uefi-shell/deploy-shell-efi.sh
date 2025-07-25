@@ -38,8 +38,20 @@ PART_DEV=$(findmnt -no SOURCE "$ESP")
 DISK=$(lsblk -no PKNAME "$PART_DEV" | head -n1)
 PART_NUM=$(echo "$PART_DEV" | sed -E 's/.*[^0-9]([0-9]+)$/\1/')
 DISK_DEV="/dev/$DISK"
+LABEL="UEFI Shell"
 
-echo "Registering UEFI boot entry..."
+# Remove existing UEFI Shell entries
+efibootmgr | grep "$LABEL" | while IFS= read -r line; do
+    # Extract the boot number Boot0003 -> 0003
+    bootnum=$(echo "$line" | grep -oP 'Boot\K[0-9A-Fa-f]{4}')
+    # If nonzero
+    if [[ -n "$bootnum" ]]; then
+        echo Removing UEFI Shell at $bootnum
+        sudo efibootmgr -b "$bootnum" -B &> /dev/null
+    fi
+done
+
+echo "Registering UEFI boot entry at $DISK_DEV part $PART_NUM"
 efibootmgr --create --disk "$DISK_DEV" --part "$PART_NUM" \
   --label "UEFI Shell" --loader '\EFI\Shell\Shell.efi'
 
