@@ -36,7 +36,7 @@ cp "$SHELL_EFI_SRC" "$DEST_EFI"
 
 PART_DEV=$(findmnt -no SOURCE "$ESP")
 DISK=$(lsblk -no PKNAME "$PART_DEV" | head -n1)
-PART_NUM=$(echo "$PART_DEV" | sed 's/[^0-9]*//g')
+PART_NUM=$(echo "$PART_DEV" | sed -E 's/.*[^0-9]([0-9]+)$/\1/')
 DISK_DEV="/dev/$DISK"
 
 echo "Registering UEFI boot entry..."
