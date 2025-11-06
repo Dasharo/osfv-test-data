@@ -41,6 +41,8 @@ git annex pull
 ```bash
 git annex addurl https://github.com/Dasharo/meta-dts/releases/download/v2.1.3/dts-base-image-v2.1.3.wic.gz --file=dts/dts-base-image-v2.1.3.wic.gz
 git annex addurl http://www.tinycorelinux.net/15.x/x86/release/TinyCore-15.0.iso --file iso/TinyCore-15.0.iso
+
+git annex push origin
 ```
 * Delete file permanently - use with caution:
 
