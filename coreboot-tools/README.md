@@ -1,7 +1,1 @@
-# coreboot-tools
-
-A bunch of coreboot tools compiled long time ago, to be used on Ubuntu while
-testing.
-
-This is to be improved, but right now we are simply moving these test files in
-a single location.
+/annex/objects/SHA256E-s203--6a35492d86661609d46774dafa30ffe3c2f47d622a6de488f4c0cd7f55413f67.md
