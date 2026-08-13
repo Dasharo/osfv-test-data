@@ -29,8 +29,10 @@ sign: hello-dasharo.efi
 	--output hello-dasharo-signed-bad.efi $<
 	sbsign --key signing/private-key-expired.pem --cert signing/cert_expired.pem \
 	--output hello-dasharo-signed-expired.efi $<
-	sbsign --key signing/private-key-leaf.pem --cert signing/cert_chain.pem \
-		--output hello-dasharo-signed-intermediate.efi $<
+	sbsign --key signing/private-key-leaf.pem \
+		   --cert signing/cert_leaf.pem \
+		   --addcert signing/cert_intermediate.pem \
+		   --output hello-dasharo-signed-intermediate.efi $<
 
 dist: sign
 	rm -rf $@
@@ -39,7 +41,7 @@ dist: sign
 	cp hello-dasharo-signed-good.efi ./$@/
 	cp hello-dasharo-signed-bad.efi ./$@/
 	cp hello-dasharo-signed-expired.efi ./$@/
-	cp hello-dasharo-signed-rootca.efi ./$@/
+	cp hello-dasharo-signed-intermediate.efi ./$@/
 	cp ./signing/cert_good.der ./$@/
 	cp ./signing/cert_expired.der ./$@/
 	cp ./signing/cert_root_ca.der ./$@/
