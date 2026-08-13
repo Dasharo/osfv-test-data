@@ -11,6 +11,8 @@ echo "Keys & certificates generation ..."
 
 rm -f *.pem
 rm -f *.der
+rm -f *.csr
+rm -f *.srl
 
 openssl genrsa -out private-key-good.pem 3072
 openssl genrsa -out private-key-bad.pem 3072
@@ -55,8 +57,6 @@ openssl x509 -req -in req_leaf.csr \
     -extfile <(echo -e "basicConstraints=critical,CA:FALSE\nkeyUsage=digitalSignature\nextendedKeyUsage=codeSigning")
 
 openssl x509 -outform der -in cert_leaf.pem -out cert_leaf.der
-
-cat cert_leaf.pem cert_intermediate.pem >cert_chain.pem
 
 faketime '1970-01-01 19:41:00' openssl req -new -x509 -key private-key-expired.pem -out cert_expired.pem \
     -days $CERT_EXPIRATION_DAYS -nodes -subj "$EXPIRED_SUBJECT"
