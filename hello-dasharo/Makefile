@@ -33,6 +33,14 @@ sign: hello-dasharo.efi
 		   --cert signing/cert_leaf.pem \
 		   --addcert signing/cert_intermediate.pem \
 		   --output hello-dasharo-signed-intermediate.efi $<
+	rm -f hello-dasharo-signed-ts.efi
+	osslsigncode sign -h sha256 \
+		-key signing/private-key-ts.pem -certs signing/cert_ts.pem \
+		-TSA-certs signing/cert_tsa.pem -TSA-key signing/private-key-tsa.pem \
+		-TSA-time $$(cat signing/ts_sign_time.txt) \
+		-in $< -out hello-dasharo-signed-ts.efi
+	sbsign --key signing/private-key-ts.pem --cert signing/cert_ts.pem \
+	--output hello-dasharo-signed-no-ts.efi $<
 
 dist: sign
 	rm -rf $@
@@ -42,9 +50,13 @@ dist: sign
 	cp hello-dasharo-signed-bad.efi ./$@/
 	cp hello-dasharo-signed-expired.efi ./$@/
 	cp hello-dasharo-signed-intermediate.efi ./$@/
+	cp hello-dasharo-signed-ts.efi ./$@/
+	cp hello-dasharo-signed-no-ts.efi ./$@/
 	cp ./signing/cert_good.der ./$@/
 	cp ./signing/cert_expired.der ./$@/
 	cp ./signing/cert_root_ca.der ./$@/
+	cp ./signing/cert_ts.der ./$@/
+	cp ./signing/cert_tsa.der ./$@/
 	cp hello-dasharo.efi ./$@/cert_fake.der
 
 clean:

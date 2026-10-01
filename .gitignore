@@ -6,3 +6,4 @@ hello-dasharo/signing/*.pem
 hello-dasharo/signing/*.der
 hello-dasharo/signing/*.csr
 hello-dasharo/signing/*.srl
+hello-dasharo/*/*.txt

@@ -8,6 +8,7 @@ Build prerequisites for Fedora:
 - mingw64-gcc
 - openssl
 - sbsigntools
+- osslsigncode
 
 Installation of mingw64-gcc compiler, or any other required package on Fedora:
 `sudo dnf install mingw64-gcc`
@@ -21,11 +22,17 @@ List of files created in `dist/` sub-directory:
 - `cert_good.der` - proper certificate file, can be enrolled with Secure Boot menu.
 - `cert_expired.der` - expired certificate file, can be enrolled with Secure Boot menu.
 - `cert_root_ca.der` - Root CA certificate file, can be enrolled with Secure Boot menu.
+- `cert_ts.der` - certificate for the timestamp tests; enrolled into DB, and
+  by hash with a revocation time into DBX
+- `cert_tsa.der` - Time Stamping Authority certificate; enrolled into DBT
 - `hello-dasharo.efi` - program binary, can be executed with Secure Boot disabled.
 - `hello-dasharo-signed-bad.efi` - program binary signed with some other certificate.
 - `hello-dasharo-signed-good.efi` - program binary signed with `cert_good.der`.
 - `hello-dasharo-signed-expired.efi` - program binary signed with `cert_expired.der`.
 - `hello-dasharo-signed-intermediate.efi` - program binary signed with `cert_intermediate.der`.
+- `hello-dasharo-signed-ts.efi` - program binary signed with `cert_ts.der`, with an
+  RFC 3161 timestamp issued by `cert_tsa.der`.
+- `hello-dasharo-signed-no-ts.efi` - program binary signed with `cert_ts.der`, without a timestamp.
 
 **Note:** The expired certificate is included for completeness. Per UEFI spec, firmware is not required to reject images signed with expired certificates (in the form that the script generates them), making them currently not viable for testing. See: https://github.com/Dasharo/dasharo-issues/issues/1863.
 

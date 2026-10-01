@@ -7,12 +7,18 @@ INTERMEDIATE_SUBJECT="/C=pl/ST=pomorskie/L=Gdańsk/O=3mdeb/OU=dasharo-team/CN=BA
 LEAF_SUBJECT="/C=pl/ST=pomorskie/L=Gdańsk/O=3mdeb/OU=dasharo-team/CN=BAD_INFLUE Leaf"
 EXPIRED_SUBJECT="/C=pl/ST=pomorskie/L=Gdańsk/O=3mdeb/OU=dasharo-team/CN=BAD_INFLUE Expired"
 
+TS_CERT_DATE='2026-06-01 12:00:00'
+TS_SIGN_TIME='2026-07-01 12:00:00'
+TSA_SUBJECT="/C=pl/ST=pomorskie/L=Gdańsk/O=3mdeb/OU=dasharo-team/CN=BAD_INFLUE Timestamp Authority"
+TS_SUBJECT="/C=pl/ST=pomorskie/L=Gdańsk/O=3mdeb/OU=dasharo-team/CN=BAD_INFLUE Timestamped"
+
 echo "Keys & certificates generation ..."
 
 rm -f *.pem
 rm -f *.der
 rm -f *.csr
 rm -f *.srl
+rm -f ts_sign_time.txt
 
 openssl genrsa -out private-key-good.pem 3072
 openssl genrsa -out private-key-bad.pem 3072
@@ -23,43 +29,59 @@ openssl rsa -in private-key-good.pem -pubout -out public-key-good.pem
 openssl rsa -in private-key-bad.pem -pubout -out public-key-bad.pem
 
 openssl req -new -x509 -key private-key-good.pem -out cert_good.pem \
-    -days $CERT_EXPIRATION_DAYS -nodes -subj "$CERT_SUBJECT"
+	-days $CERT_EXPIRATION_DAYS -nodes -subj "$CERT_SUBJECT"
 openssl req -new -x509 -key private-key-bad.pem -out cert_bad.pem \
-    -days $CERT_EXPIRATION_DAYS -nodes -subj "$CERT_SUBJECT"
+	-days $CERT_EXPIRATION_DAYS -nodes -subj "$CERT_SUBJECT"
 
 openssl x509 -outform der -in cert_good.pem -out cert_good.der
 
 openssl req -new -x509 -key private-key-root-ca.pem -out cert_root_ca.pem \
-    -days $CERT_EXPIRATION_DAYS -nodes -subj "$CA_SUBJECT" \
-    -addext "basicConstraints=critical,CA:TRUE" \
-    -addext "keyUsage=critical,keyCertSign,cRLSign"
+	-days $CERT_EXPIRATION_DAYS -nodes -subj "$CA_SUBJECT" \
+	-addext "basicConstraints=critical,CA:TRUE" \
+	-addext "keyUsage=critical,keyCertSign,cRLSign"
 
 openssl x509 -outform der -in cert_root_ca.pem -out cert_root_ca.der
 
 openssl req -new -newkey rsa:3072 -nodes \
-    -keyout private-key-intermediate.pem -out req_intermediate.csr \
-    -subj "$INTERMEDIATE_SUBJECT"
+	-keyout private-key-intermediate.pem -out req_intermediate.csr \
+	-subj "$INTERMEDIATE_SUBJECT"
 
 openssl x509 -req -in req_intermediate.csr \
-    -CA cert_root_ca.pem -CAkey private-key-root-ca.pem -CAcreateserial \
-    -out cert_intermediate.pem -days $CERT_EXPIRATION_DAYS \
-    -extfile <(echo -e "basicConstraints=critical,CA:TRUE\nkeyUsage=critical,digitalSignature,keyCertSign,cRLSign")
+	-CA cert_root_ca.pem -CAkey private-key-root-ca.pem -CAcreateserial \
+	-out cert_intermediate.pem -days $CERT_EXPIRATION_DAYS \
+	-extfile <(echo -e "basicConstraints=critical,CA:TRUE\nkeyUsage=critical,digitalSignature,keyCertSign,cRLSign")
 
 openssl x509 -outform der -in cert_intermediate.pem -out cert_intermediate.der
 
 openssl req -new -newkey rsa:3072 -nodes \
-    -keyout private-key-leaf.pem -out req_leaf.csr \
-    -subj "$LEAF_SUBJECT"
+	-keyout private-key-leaf.pem -out req_leaf.csr \
+	-subj "$LEAF_SUBJECT"
 
 openssl x509 -req -in req_leaf.csr \
-    -CA cert_intermediate.pem -CAkey private-key-intermediate.pem -CAcreateserial \
-    -out cert_leaf.pem -days $CERT_EXPIRATION_DAYS \
-    -extfile <(echo -e "basicConstraints=critical,CA:FALSE\nkeyUsage=digitalSignature\nextendedKeyUsage=codeSigning")
+	-CA cert_intermediate.pem -CAkey private-key-intermediate.pem -CAcreateserial \
+	-out cert_leaf.pem -days $CERT_EXPIRATION_DAYS \
+	-extfile <(echo -e "basicConstraints=critical,CA:FALSE\nkeyUsage=digitalSignature\nextendedKeyUsage=codeSigning")
 
 openssl x509 -outform der -in cert_leaf.pem -out cert_leaf.der
 
 faketime '1970-01-01 19:41:00' openssl req -new -x509 -key private-key-expired.pem -out cert_expired.pem \
-    -days $CERT_EXPIRATION_DAYS -nodes -subj "$EXPIRED_SUBJECT"
+	-days $CERT_EXPIRATION_DAYS -nodes -subj "$EXPIRED_SUBJECT"
 openssl x509 -outform der -in cert_expired.pem -out cert_expired.der
+
+openssl genrsa -out private-key-tsa.pem 3072
+faketime "$TS_CERT_DATE" openssl req -new -x509 -key private-key-tsa.pem -out cert_tsa.pem \
+	-days $CERT_EXPIRATION_DAYS -nodes -subj "$TSA_SUBJECT" \
+	-addext "basicConstraints=critical,CA:FALSE" \
+	-addext "keyUsage=critical,digitalSignature" \
+	-addext "extendedKeyUsage=critical,timeStamping"
+openssl x509 -outform der -in cert_tsa.pem -out cert_tsa.der
+
+openssl genrsa -out private-key-ts.pem 3072
+faketime "$TS_CERT_DATE" openssl req -new -x509 -key private-key-ts.pem -out cert_ts.pem \
+	-days $CERT_EXPIRATION_DAYS -nodes -subj "$TS_SUBJECT" \
+	-addext "extendedKeyUsage=codeSigning"
+openssl x509 -outform der -in cert_ts.pem -out cert_ts.der
+
+date -u -d "$TS_SIGN_TIME" +%s >ts_sign_time.txt
 
 echo "... Done."
