@@ -30,7 +30,6 @@ rely on URLs prepare beforehand. It may change in the future.
 * After cloning, execute following to finalize test data setup:
 
 ```bash
-git annex pull
 ./setup.sh
 ```
 

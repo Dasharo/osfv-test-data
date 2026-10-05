@@ -3,6 +3,9 @@
 # Various setup actions after cloning this repo to fully prepare data for
 # testing
 
+git config annex.private true
+git annex init
+git annex pull
 
 # dts
 if pushd dts; then
