@@ -24,9 +24,9 @@ tasks:
       - docker push "$IMAGE:latest"
       - docker push "$IMAGE:{{.RELEASE_TAG}}"
 
-  # Run CMD directly in the CI image, as in CI, otherwise start the image,
-  # giving the files back to their owner afterwards. The git dir is mounted at
-  # its own path, a submodule's .git points outside the tree
+  # Run CMD directly in the CI image, as in CI, otherwise start the image: as
+  # root for losetup, giving the files back to their owner afterwards. The git
+  # dir is mounted at its own path, a submodule's .git points outside the tree
   run:
     internal: true
     cmds:
@@ -37,7 +37,7 @@ tasks:
         gitdir=$(git rev-parse --absolute-git-dir)
         tty=""
         if [ -t 1 ]; then tty=-t; fi
-        docker run --rm --network host $tty \
+        docker run --rm --privileged --network host $tty \
           -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}" -v "$gitdir:$gitdir" -w "{{.ROOT_DIR}}" \
           -e FTP_DOMAIN -e FTP_LOGIN -e FTP_PASSWORD -e FTP_REMOTE_DIR_PREFIX -e PUBLIC_URL \
           -e GIT_AUTHOR_NAME="$(git config user.name)" -e GIT_AUTHOR_EMAIL="$(git config user.email)" \
@@ -50,6 +50,21 @@ tasks:
     cmds:
       - ./setup.sh
 
+  build:
+    desc: Build, download or keep the ARTIFACTS of DIR (default every */Makefile) and add them to the annex
+    cmds:
+      - task: setup
+      - task: run
+        vars:
+          CMD: ./artifacts.sh build {{if .DIR}}{{.DIR}}{{else}}$(dirname */Makefile){{end}}
+
+  check:
+    desc: Fail when the annexed files differ from the ARTIFACTS of the Makefiles
+    cmds:
+      - task: run
+        vars:
+          CMD: ./artifacts.sh check
+
   mirror:
     desc: Upload annexed files missing from the FTP, register the FTP URL and drop every other URL, without pushing
     cmds:
@@ -58,9 +73,30 @@ tasks:
           CMD: ./artifacts.sh mirror
 
   publish:
-    desc: Mirror every annexed file to the FTP and push master
+    desc: Build the ARTIFACTS of DIR, commit them, mirror everything to the FTP and push master
+    preconditions:
+      - sh: '[ "$(git rev-parse --abbrev-ref HEAD)" = master ]'
+        msg: Run from the master branch
     cmds:
-      - task: setup
+      # Publish commits only artifacts, built from committed sources
+      - task: run
+        vars:
+          CMD: ./artifacts.sh clean
+      - task: run
+        vars:
+          CMD: ./artifacts.sh build {{.DIR}}
+      - task: check
+      - git diff --cached --quiet || git commit -m "Update artifacts"
       # The FTP copy must exist before master points at a file
       - task: mirror
       - git push origin master git-annex
+
+  ci:
+    desc: CI entry point, publish the directories changed by the pushed commits
+    vars:
+      CHANGED:
+        sh: ./artifacts.sh changed
+    cmds:
+      - task: publish
+        vars:
+          DIR: '{{.CHANGED}}'

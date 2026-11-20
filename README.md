@@ -18,12 +18,13 @@ versioning large files. Make sure to install it first.
 sudo dnf install git-annex
 ```
 
-To publish files, also install [Task](https://taskfile.dev/installation/) and
-Docker.
+To build or publish files, also install [Task](https://taskfile.dev/installation/)
+and Docker.
 
 We manage this repo by uploading large files to the 3mdeb FTP, with the tasks
-described below. External references (e.g. release mirror for ISO of particular
-Linux distro) are only used to add a file. We do not use
+described below. Where each file comes from, a build procedure or an external
+reference (e.g. release mirror for ISO of particular Linux distro), is kept in
+the `Makefile` of its directory. We do not use
 [remote in git-annex](https://git-annex.branchable.com/special_remotes/) right now, we
 rely on the FTP URLs registered by the tasks. It may change in the future.
 
@@ -37,27 +38,29 @@ rely on the FTP URLs registered by the tasks. It may change in the future.
 
 With Task installed, `task setup` does the same.
 
-## Publish
+## Build and publish
 
 ```bash
-task publish
+task build DIR=secure-boot
+task publish DIR=iso
 ```
 
-`task publish` uploads every annexed file that is not on the FTP yet and pushes
-`master`. It needs `FTP_DOMAIN`, `FTP_LOGIN` and `FTP_PASSWORD` in the
-environment, and `FTP_REMOTE_DIR_PREFIX` if your FTP account needs one.
+`task build` rebuilds the files of a directory locally, all of them without
+`DIR`. `task publish` also uploads them and pushes `master`, it needs
+`FTP_DOMAIN`, `FTP_LOGIN` and `FTP_PASSWORD` in the environment, and
+`FTP_REMOTE_DIR_PREFIX` if your FTP account needs one.
 
 ## Common actions
 
-* Add new file from URL:
+* Add or update a file: put it in its directory, or add a rule that builds or
+  downloads it, list it in `ARTIFACTS` of that directory's `Makefile`, commit
+  the Makefile and publish:
 
 ```bash
-git annex addurl https://github.com/Dasharo/meta-dts/releases/download/v2.1.3/dts-base-image-v2.1.3.wic.gz --file=dts/dts-base-image-v2.1.3.wic.gz
-git annex addurl http://www.tinycorelinux.net/15.x/x86/release/TinyCore-15.0.iso --file iso/TinyCore-15.0.iso
-
-git commit -m "Add new files"
-task publish
+git commit -m "iso: add TinyCore-16.0.iso" iso/Makefile
+task publish DIR=iso
 ```
+
 * Delete file permanently - use with caution:
 
 ```bash

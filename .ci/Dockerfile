@@ -9,8 +9,19 @@ RUN dnf install -y --setopt=install_weak_deps=False \
         git-annex \
         gzip \
         tar \
+        make \
+        mingw64-gcc \
+        openssl \
+        sbsigntools \
+        osslsigncode \
+        libfaketime \
+        parted \
+        dosfstools \
+        sudo \
+        util-linux \
         lftp \
         openssh-clients \
+        jq \
     && dnf clean all
 
 ARG TASK_VERSION=3.45.4
