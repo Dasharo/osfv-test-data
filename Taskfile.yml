@@ -59,11 +59,20 @@ tasks:
           CMD: ./artifacts.sh build {{if .DIR}}{{.DIR}}{{else}}$(dirname */Makefile){{end}}
 
   check:
-    desc: Fail when the annexed files differ from the ARTIFACTS of the Makefiles
+    desc: Fail when the annexed files differ from the ARTIFACTS, or a clone is recorded in the git-annex branch
     cmds:
       - task: run
         vars:
           CMD: ./artifacts.sh check
+
+  forget:
+    desc: Prune every clone recorded in the git-annex branch and force push it
+    prompt: This rewrites and force pushes the git-annex branch. Continue?
+    cmds:
+      - task: run
+        vars:
+          CMD: ./artifacts.sh forget
+      - git push --force origin git-annex
 
   mirror:
     desc: Upload annexed files missing from the FTP, register the FTP URL and drop every other URL, without pushing

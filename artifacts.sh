@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
 # Operations on the ARTIFACTS of */Makefile, called by the Taskfile:
-# artifacts.sh list|build DIR...|check|clean|changed|mirror
+# artifacts.sh list|build DIR...|check|forget|clean|changed|mirror
 
 set -euo pipefail
 shopt -s inherit_errexit
 
 FTP_SUBDIR="osfv-test-data"
 PUBLIC_URL="${PUBLIC_URL:-https://dl.3mdeb.com/open-source-firmware/Dasharo/osfv-test-data}"
+
+# Never record this clone in the git-annex branch, even if annex auto-initializes
+git config annex.private true
 
 makevar() {
   make -s --no-print-directory -C "$1" --eval "print-var: ; @echo \$($2)" print-var
@@ -44,11 +47,29 @@ build() {
   done
 }
 
+# Content lives only on the FTP, so the git-annex branch must record no repository
 check() {
-  local listed annexed
+  local listed annexed repos
   listed=$(list)
   annexed=$(git annex find --include='*')
   diff -u --label ARTIFACTS --label annexed <(printf '%s\n' "$listed" | sort) <(printf '%s\n' "$annexed" | sort)
+  if git cat-file -e git-annex:uuid.log 2>/dev/null; then
+    repos=$(git show git-annex:uuid.log)
+    if [ -n "$repos" ]; then
+      echo "The git-annex branch records these repositories, run task forget:" >&2
+      echo "$repos" >&2
+      exit 1
+    fi
+  fi
+}
+
+forget() {
+  local uuids uuid
+  uuids=$(git show git-annex:uuid.log | cut -d' ' -f1)
+  for uuid in $uuids; do
+    git annex dead "$uuid"
+  done
+  git annex forget --drop-dead --force
 }
 
 # Publish commits only artifacts, built from committed sources
