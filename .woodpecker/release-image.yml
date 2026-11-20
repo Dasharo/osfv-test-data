@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 3mdeb <contact@3mdeb.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Rebuild and publish the CI image after a merge that changes it. It runs in
+# osfv-ci, which has Docker and Task, so it does not need its own image.
+when:
+  - branch: master
+    event: [push, manual]
+    path:
+      include:
+        - .ci/Dockerfile
+        - .woodpecker/release-image.yml
+
+skip_clone: true
+
+steps:
+  - name: clone
+    image: git.3mdeb.com/dasharo/osfv-ci:latest
+    pull: true
+    environment:
+      GITEA_TOKEN:
+        from_secret: GITEA_BUILDER_TOKEN_REPO_READ
+    commands:
+      - git init -q .
+      - git remote add origin "$(printf '%s' "$${CI_REPO_CLONE_URL}" | sed "s#^https://#https://ci:$${GITEA_TOKEN}@#")"
+      - git fetch -q --no-tags origin "+$${CI_COMMIT_SHA}:"
+      - git checkout -q FETCH_HEAD
+
+  - name: release
+    image: git.3mdeb.com/dasharo/osfv-ci:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      REGISTRY_TOKEN:
+        from_secret: OSFV_PACKAGER_TOKEN
+    commands:
+      - echo "$${REGISTRY_TOKEN}" | docker login git.3mdeb.com -u builder --password-stdin
+      - task image:release

@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 3mdeb <contact@3mdeb.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Mirror every annexed file to the FTP after a push, and on cron or manual runs
+when:
+  - branch: master
+    event: [push, manual, cron]
+
+# Two runs pushing master and the git-annex branch at once would race
+concurrency:
+  limit: 1
+  group: git-annex
+
+skip_clone: true
+
+steps:
+  - name: publish
+    image: git.3mdeb.com/dasharo/osfv-test-data-ci:latest
+    pull: true
+    environment:
+      GITEA_TOKEN:
+        from_secret: GITEA_BUILDER_TOKEN_REBASE_CI
+      FTP_DOMAIN:
+        from_secret: FTP_DOMAIN
+      FTP_LOGIN:
+        from_secret: FTP_LOGIN
+      FTP_PASSWORD:
+        from_secret: FTP_PASSWORD
+    commands:
+      - git init -q .
+      - git remote add origin "$(printf '%s' "$${CI_REPO_CLONE_URL}" | sed "s#^https://#https://ci:$${GITEA_TOKEN}@#")"
+      - git fetch -q origin +refs/heads/master:refs/remotes/origin/master +refs/heads/git-annex:refs/remotes/origin/git-annex
+      - git checkout -q -b master origin/master
+      - git config user.email "ci@3mdeb.com"
+      - git config user.name "osfv-ci"
+      - task publish

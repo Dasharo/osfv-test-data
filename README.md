@@ -18,12 +18,14 @@ versioning large files. Make sure to install it first.
 sudo dnf install git-annex
 ```
 
-We manage this repo by first uploading large files **somewhere** (cloud, HTTP
-hosting), or using external references (e.g. release mirror for ISO of
-particular Linux distro). Then, we track such file in this repo via `git annex`.
-We do not use
+To publish files, also install [Task](https://taskfile.dev/installation/) and
+Docker.
+
+We manage this repo by uploading large files to the 3mdeb FTP, with the tasks
+described below. External references (e.g. release mirror for ISO of particular
+Linux distro) are only used to add a file. We do not use
 [remote in git-annex](https://git-annex.branchable.com/special_remotes/) right now, we
-rely on URLs prepare beforehand. It may change in the future.
+rely on the FTP URLs registered by the tasks. It may change in the future.
 
 ## Setup this repo
 
@@ -33,6 +35,18 @@ rely on URLs prepare beforehand. It may change in the future.
 ./setup.sh
 ```
 
+With Task installed, `task setup` does the same.
+
+## Publish
+
+```bash
+task publish
+```
+
+`task publish` uploads every annexed file that is not on the FTP yet and pushes
+`master`. It needs `FTP_DOMAIN`, `FTP_LOGIN` and `FTP_PASSWORD` in the
+environment, and `FTP_REMOTE_DIR_PREFIX` if your FTP account needs one.
+
 ## Common actions
 
 * Add new file from URL:
@@ -41,7 +55,8 @@ rely on URLs prepare beforehand. It may change in the future.
 git annex addurl https://github.com/Dasharo/meta-dts/releases/download/v2.1.3/dts-base-image-v2.1.3.wic.gz --file=dts/dts-base-image-v2.1.3.wic.gz
 git annex addurl http://www.tinycorelinux.net/15.x/x86/release/TinyCore-15.0.iso --file iso/TinyCore-15.0.iso
 
-git annex push origin
+git commit -m "Add new files"
+task publish
 ```
 * Delete file permanently - use with caution:
 
