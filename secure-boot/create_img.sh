@@ -30,43 +30,17 @@ error_check "Cannot create empty image file to store created certs and EFI files
 # Step2: Create partition table and partition entry
 parted -s $IMAGE_FILE mklabel msdos mkpart primary fat32 $((PARTITION_OFFSET_SECTORS))s $(($IMAGE_SIZE_SECTORS-1))s
 
-# Step 3: Attach loop device to created partition
-LOOPDEV=$(sudo losetup --offset $PARTITION_OFFSET_BYTES --show --find $IMAGE_FILE)
-echo $LOOPDEV
-MOUNTDIR=$(mktemp -d)
-
-# Step 4: Create FAT32 and name it
-sudo mkfs.fat -F 32 -n $IMAGELABEL $LOOPDEV
+# Step 3: Create FAT32 in the partition and name it
+mkfs.fat -F 32 -n $IMAGELABEL --offset $PARTITION_OFFSET_SECTORS $IMAGE_FILE $((($IMAGE_SIZE_SECTORS-$PARTITION_OFFSET_SECTORS)*$SECTOR_SIZE_BYTES/1024))
 error_check "Cannot create FAT32 labeled: $IMAGELABEL"
 
-# Step 5: Mount it in tmp dir
-MOUNTDIR=$(mktemp -d)
-error_check "Cannot create temporary mount directory"
-sudo mount $LOOPDEV $MOUNTDIR
-error_check "Cannot mount FAT32 partition"
-
-# Step 6: Copy all files under FILES_DIR directory
+# Step 4: Copy all files under FILES_DIR directory
 echo "Copying files to image..."
-if [ -d "$FILES_DIR" ]; then
-    sudo cp -v -r $FILES_DIR/* $MOUNTDIR
-    error_check "Cannot copy files to image"
-    sudo sync
-else
-    echo "Warning: $FILES_DIR does not exist or is not a directory"
-fi
+mcopy -i $IMAGE_FILE@@$PARTITION_OFFSET_BYTES $FILES_DIR/* ::
+error_check "Cannot copy files to image"
 
 echo
-echo  $MOUNTDIR contains:
-ls -l $MOUNTDIR
-
-# Step 7: Unmount
-echo "Unmounting and cleaning up..."
-sudo umount $MOUNTDIR
-error_check "Cannot unmount partition"
-
-sudo losetup -d $LOOPDEV
-error_check "Cannot detach loop device"
-
-rmdir $MOUNTDIR
+echo $IMAGE_FILE contains:
+mdir -i $IMAGE_FILE@@$PARTITION_OFFSET_BYTES ::
 
 echo "Image creation and setup completed successfully."

@@ -19,8 +19,6 @@ steps:
   - name: publish
     image: git.3mdeb.com/dasharo/osfv-test-data-ci:latest
     pull: true
-    # secure-boot/create_img.sh attaches a loop device and mounts it
-    privileged: true
     environment:
       GITEA_TOKEN:
         from_secret: GITEA_BUILDER_TOKEN_REBASE_CI

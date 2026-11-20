@@ -17,8 +17,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
         libfaketime \
         parted \
         dosfstools \
-        sudo \
-        util-linux \
+        mtools \
         lftp \
         openssh-clients \
         jq \

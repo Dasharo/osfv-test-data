@@ -25,7 +25,7 @@ tasks:
       - docker push "$IMAGE:{{.RELEASE_TAG}}"
 
   # Run CMD directly in the CI image, as in CI, otherwise start the image: as
-  # root for losetup, giving the files back to their owner afterwards. The git
+  # root, giving the files back to their owner afterwards. The git
   # dir is mounted at its own path, a submodule's .git points outside the tree
   run:
     internal: true
@@ -37,7 +37,7 @@ tasks:
         gitdir=$(git rev-parse --absolute-git-dir)
         tty=""
         if [ -t 1 ]; then tty=-t; fi
-        docker run --rm --privileged --network host $tty \
+        docker run --rm --network host $tty \
           -v "{{.ROOT_DIR}}:{{.ROOT_DIR}}" -v "$gitdir:$gitdir" -w "{{.ROOT_DIR}}" \
           -e FTP_DOMAIN -e FTP_LOGIN -e FTP_PASSWORD -e FTP_REMOTE_DIR_PREFIX -e PUBLIC_URL \
           -e GIT_AUTHOR_NAME="$(git config user.name)" -e GIT_AUTHOR_EMAIL="$(git config user.email)" \
