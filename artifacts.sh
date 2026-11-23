@@ -147,7 +147,7 @@ mirror() {
       object=$(git annex contentlocation "$key")
       echo "Uploading $file"
       # Credentials via stdin and no output, so they reach neither ps nor the log
-      lftp &>/dev/null <<EOF
+      if ! lftp &>/dev/null <<EOF
 set net:max-retries 2
 set net:timeout 30
 open -u ${FTP_LOGIN},${FTP_PASSWORD} ${FTP_DOMAIN}
@@ -156,6 +156,11 @@ cd ${dir}
 put ${object}
 bye
 EOF
+      then
+        echo "Uploading $file failed, check FTP_DOMAIN, FTP_LOGIN, FTP_PASSWORD and FTP_REMOTE_DIR_PREFIX" >&2
+        exit 1
+      fi
+
       echo "Verifying $url"
       if ! served=$(curl -fL --progress-bar "$url" | sha256sum) || [ "${served%% *}" != "$hash" ]; then
         echo "Uploading $file failed or $url does not serve it, check FTP_DOMAIN, FTP_LOGIN, FTP_PASSWORD and FTP_REMOTE_DIR_PREFIX" >&2
