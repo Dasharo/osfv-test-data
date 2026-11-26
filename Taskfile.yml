@@ -53,7 +53,6 @@ tasks:
   build:
     desc: Build, download or keep the ARTIFACTS of DIR (default every */Makefile) and add them to the annex
     cmds:
-      - task: setup
       - task: run
         vars:
           CMD: ./artifacts.sh build {{if .DIR}}{{.DIR}}{{else}}$(dirname */Makefile){{end}}
