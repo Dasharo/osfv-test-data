@@ -67,6 +67,9 @@ tasks:
   forget:
     desc: Prune every clone recorded in the git-annex branch and force push it
     prompt: This rewrites and force pushes the git-annex branch. Continue?
+    preconditions:
+      - sh: '[ -z "${PUBLIC_URL:-}" ]'
+        msg: PUBLIC_URL is for local tests with task mirror, forget would push its URLs
     cmds:
       - task: run
         vars:

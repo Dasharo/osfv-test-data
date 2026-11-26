@@ -61,7 +61,16 @@ check() {
 }
 
 forget() {
-  local uuids uuid
+  local files file stray uuids uuid
+  files=$(git annex find --include='*')
+  for file in $files; do
+    stray=$(stray_urls "$file")
+    if [ -n "$stray" ]; then
+      echo "$file has URLs other than its FTP and Makefile URLs, remove them with git annex rmurl:" >&2
+      echo "$stray" >&2
+      exit 1
+    fi
+  done
   git cat-file -e git-annex:uuid.log 2>/dev/null || return 0
   uuids=$(git show git-annex:uuid.log | cut -d' ' -f1)
   for uuid in $uuids; do
@@ -136,6 +145,15 @@ makefile_urls() {
   { grep -oE 'https?://[^[:space:]"'\'']+' || true; } <<<"$recipe"
 }
 
+# URLs of an annexed file other than its FTP and Makefile URLs, such as a test
+# server's
+stray_urls() {
+  local key keep
+  key=$(git annex lookupkey "$1")
+  keep=$(makefile_urls "$1")$'\n'"${PUBLIC_URL}/${key}"
+  git annex whereis --key="$key" | sed -n 's/^[[:space:]]*web: //p' | { grep -vxF "$keep" || true; }
+}
+
 # Upload each annexed file as its key, then keep the FTP URL and the Makefile
 # URLs, as a fallback when the FTP is down
 mirror() {
@@ -188,8 +206,7 @@ EOF
       git annex registerurl "$key" "$url"
     fi
 
-    keep+=$'\n'"$url"
-    others=$(git annex whereis --key="$key" | sed -n 's/^[[:space:]]*web: //p' | { grep -vxF "$keep" || true; })
+    others=$(stray_urls "$file")
     for other in $others; do
       git annex rmurl "$file" "$other"
     done
