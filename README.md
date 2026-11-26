@@ -87,3 +87,9 @@ git annex drop --force FILE_NAME --from web # execute this line for each reposit
 rm FILE_NAME
 git annex sync
 ```
+
+* Remove a clone, git-annex makes its objects read-only:
+
+```bash
+chmod -R u+w osfv-test-data && rm -rf osfv-test-data
+```
