@@ -147,6 +147,12 @@ mirror() {
     key=$(git annex lookupkey "$file")
     url="${PUBLIC_URL}/${key}"
 
+    # Registered first, so the get below can also fetch from upstream
+    keep=$(makefile_urls "$file")
+    for other in $keep; do
+      git annex registerurl "$key" "$other"
+    done
+
     if git annex whereis --key="$key" | grep -F "$url" >/dev/null; then
       echo "$file is already on the FTP"
     else
@@ -182,10 +188,6 @@ EOF
       git annex registerurl "$key" "$url"
     fi
 
-    keep=$(makefile_urls "$file")
-    for other in $keep; do
-      git annex registerurl "$key" "$other"
-    done
     keep+=$'\n'"$url"
     others=$(git annex whereis --key="$key" | sed -n 's/^[[:space:]]*web: //p' | { grep -vxF "$keep" || true; })
     for other in $others; do
