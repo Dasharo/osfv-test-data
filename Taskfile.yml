@@ -34,7 +34,7 @@ tasks:
         {{if .OSFV_TEST_DATA_IMAGE}}
         {{.CMD}}
         {{else}}
-        gitdir=$(git rev-parse --absolute-git-dir)
+        gitdir=$(git rev-parse --path-format=absolute --git-common-dir)
         tty=""
         if [ -t 1 ]; then tty=-t; fi
         docker run --rm --network host $tty \
