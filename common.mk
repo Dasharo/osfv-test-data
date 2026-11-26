@@ -4,7 +4,7 @@
 setup: $(addprefix fetch-,$(ARTIFACTS))
 
 fetch-%:
-	git annex get $* || { echo "Fetching $* failed, building it" >&2; $(MAKE) -B $* && git annex add $*; }
+	git annex get $* || { echo "Fetching $* failed, building it" >&2; $(MAKE) -B $* || { git checkout -- $*; exit 1; }; }
 
 .PHONY: setup
 .DELETE_ON_ERROR:
