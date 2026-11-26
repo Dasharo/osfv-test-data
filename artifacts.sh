@@ -62,6 +62,7 @@ check() {
 
 forget() {
   local uuids uuid
+  git cat-file -e git-annex:uuid.log 2>/dev/null || return 0
   uuids=$(git show git-annex:uuid.log | cut -d' ' -f1)
   for uuid in $uuids; do
     git annex dead "$uuid"
