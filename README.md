@@ -39,7 +39,8 @@ described below. Where each file comes from, a build procedure or an external
 reference (e.g. release mirror for ISO of particular Linux distro), is kept in
 the `Makefile` of its directory. We do not use
 [remote in git-annex](https://git-annex.branchable.com/special_remotes/) right now, we
-rely on the FTP URLs registered by the tasks. It may change in the future.
+rely on the FTP URLs registered by the tasks, with the URLs of the Makefiles as a
+fallback. It may change in the future.
 
 ## Setup this repo
 

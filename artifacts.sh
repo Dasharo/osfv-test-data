@@ -128,9 +128,18 @@ lftp_quote() {
   printf '"%s"' "${s//\"/\\\"}"
 }
 
-# Upload each annexed file as its key, then keep the FTP URL as its only URL
+# URLs in the Makefile recipe of an annexed file
+makefile_urls() {
+  local dir="${1%/*}" recipe
+  [ -f "$dir/Makefile" ] || return 0
+  recipe=$(make -n -B --no-print-directory -C "$dir" "${1##*/}")
+  { grep -oE 'https?://[^[:space:]"'\'']+' || true; } <<<"$recipe"
+}
+
+# Upload each annexed file as its key, then keep the FTP URL and the Makefile
+# URLs, as a fallback when the FTP is down
 mirror() {
-  local dir files file key url hash object served others other
+  local dir files file key url hash object served keep others other
   : "${FTP_DOMAIN:?}" "${FTP_LOGIN:?}" "${FTP_PASSWORD:?}"
   dir="${FTP_REMOTE_DIR_PREFIX:+$FTP_REMOTE_DIR_PREFIX/}${FTP_SUBDIR}"
   files=$(git annex find --include='*')
@@ -173,7 +182,12 @@ EOF
       git annex registerurl "$key" "$url"
     fi
 
-    others=$(git annex whereis --key="$key" | sed -n 's/^[[:space:]]*web: //p' | awk -v keep="$url" '$0 != keep')
+    keep=$(makefile_urls "$file")
+    for other in $keep; do
+      git annex registerurl "$key" "$other"
+    done
+    keep+=$'\n'"$url"
+    others=$(git annex whereis --key="$key" | sed -n 's/^[[:space:]]*web: //p' | { grep -vxF "$keep" || true; })
     for other in $others; do
       git annex rmurl "$file" "$other"
     done
