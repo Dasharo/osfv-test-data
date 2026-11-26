@@ -15,6 +15,9 @@ concurrency:
 
 skip_clone: true
 
+labels:
+  network: [office, lab]
+
 steps:
   - name: publish
     image: git.3mdeb.com/dasharo/osfv-test-data-ci:latest
