@@ -66,7 +66,7 @@ forget() {
   for file in $files; do
     stray=$(stray_urls "$file")
     if [ -n "$stray" ]; then
-      echo "$file has URLs other than its FTP and Makefile URLs, remove them with git annex rmurl:" >&2
+      echo "$file has URLs other than its FTP and Makefile URLs, run task mirror without PUBLIC_URL set:" >&2
       echo "$stray" >&2
       exit 1
     fi
