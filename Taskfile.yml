@@ -46,9 +46,9 @@ tasks:
         {{end}}
 
   setup:
-    desc: Initialize the annex and fetch every annexed file from the FTP
+    desc: Fetch every annexed file, build those the annex cannot fetch
     cmds:
-      - ./setup.sh
+      - make
 
   build:
     desc: Build, download or keep the ARTIFACTS of DIR (default every */Makefile) and add them to the annex

@@ -47,10 +47,12 @@ fallback. It may change in the future.
 * After cloning, execute following to finalize test data setup:
 
 ```bash
-./setup.sh
+make
 ```
 
-With Task installed, `task setup` does the same.
+It fetches every annexed file, and builds those the annex cannot fetch with the
+rules of their directory's `Makefile`. With Task installed, `task setup` does
+the same.
 
 ## Build and publish
 
