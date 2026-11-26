@@ -38,10 +38,7 @@ build() {
   for dir in "$@"; do
     artifacts=$(makevar "$dir" ARTIFACTS)
     for artifact in $artifacts; do
-      if on_ftp "$dir/$artifact"; then
-        git annex get "$dir/$artifact"
-      fi
-      make -C "$dir" "$artifact"
+      make -B -C "$dir" "$artifact"
       git annex add "$dir/$artifact"
     done
   done
