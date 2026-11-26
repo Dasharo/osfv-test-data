@@ -5,7 +5,7 @@
 # Rebuild the directories changed by a push, then mirror everything to the FTP.
 # Cron and manual runs carry no changed files, so they only mirror.
 when:
-  - branch: [master, ci-ftp-rework]
+  - branch: master
     event: [push, manual, cron]
 
 # Two runs pushing master and the git-annex branch at once would race
@@ -16,7 +16,7 @@ concurrency:
 skip_clone: true
 
 labels:
-  network: [office, lab]
+  network: "*"
 
 steps:
   - name: publish
