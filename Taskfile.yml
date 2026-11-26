@@ -86,6 +86,8 @@ tasks:
     preconditions:
       - sh: '[ "$(git rev-parse --abbrev-ref HEAD)" = master ]'
         msg: Run from the master branch
+      - sh: '[ -z "${PUBLIC_URL:-}" ]'
+        msg: PUBLIC_URL is for local tests with task mirror, publish would push its URLs
     cmds:
       # Publish commits only artifacts, built from committed sources
       - task: run
