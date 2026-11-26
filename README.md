@@ -19,7 +19,20 @@ sudo dnf install git-annex
 ```
 
 To build or publish files, also install [Task](https://taskfile.dev/installation/)
-and Docker.
+and Docker. The tasks run in the `git.3mdeb.com/dasharo/osfv-test-data-ci`
+image, log in to pull it, with your Gitea username and a token with package read
+access:
+
+```bash
+docker login git.3mdeb.com
+```
+
+Without access to the package, build the image locally from `.ci/Dockerfile`,
+the tasks then use the local copy:
+
+```bash
+task image:build
+```
 
 We manage this repo by uploading large files to the 3mdeb FTP, with the tasks
 described below. Where each file comes from, a build procedure or an external
