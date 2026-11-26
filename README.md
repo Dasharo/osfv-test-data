@@ -67,10 +67,13 @@ task publish DIR=iso
 
 * Add or update a file: put it in its directory, or add a rule that builds or
   downloads it, list it in `ARTIFACTS` of that directory's `Makefile`, commit
-  the Makefile and publish:
+  the Makefile and publish. A file that is replaced must be removed in the same
+  commit, `task publish` fails on annexed files missing from `ARTIFACTS`:
 
 ```bash
-git commit -m "iso: add TinyCore-16.0.iso" iso/Makefile
+git rm iso/TinyCore-15.0.iso
+git add iso/Makefile
+git commit -m "iso: replace TinyCore-15.0.iso with TinyCore-16.0.iso"
 task publish DIR=iso
 ```
 
