@@ -122,6 +122,12 @@ changed() {
   echo "${selected[*]}"
 }
 
+# Quote an lftp command argument, escaping \ and "
+lftp_quote() {
+  local s=${1//\\/\\\\}
+  printf '"%s"' "${s//\"/\\\"}"
+}
+
 # Upload each annexed file as its key, then keep the FTP URL as its only URL
 mirror() {
   local dir files file key url hash object served others other
@@ -144,14 +150,14 @@ mirror() {
       git annex get --key="$key"
       object=$(git annex contentlocation "$key")
       echo "Uploading $file"
-      # Credentials via stdin and no output, so they reach neither ps nor the log
-      if ! lftp &>/dev/null <<EOF
+      # Password via the environment, so it reaches neither ps nor the log
+      if ! LFTP_PASSWORD="$FTP_PASSWORD" lftp 2>&1 >/dev/null <<EOF
 set net:max-retries 2
 set net:timeout 30
-open -u ${FTP_LOGIN},${FTP_PASSWORD} ${FTP_DOMAIN}
-mkdir -p ${dir}
-cd ${dir}
-put ${object}
+open --env-password -u $(lftp_quote "$FTP_LOGIN") $(lftp_quote "$FTP_DOMAIN")
+mkdir -p $(lftp_quote "$dir")
+cd $(lftp_quote "$dir")
+put $(lftp_quote "$object")
 bye
 EOF
       then
